@@ -1,0 +1,12 @@
+function du =Duffing_unknown(t,u,r,w,ext_signal)
+% global a
+k=0.5;
+
+
+
+du=zeros(2,1);
+du(1)=w * (u(2));
+du(2)=w * (-k*(1+0.3*u(1)^2)*u(2)-u(1)^5+u(1)^3+r*cos(w*t)+ext_signal(t));%本文提出的
+du=[du(1);du(2)];
+
+end
