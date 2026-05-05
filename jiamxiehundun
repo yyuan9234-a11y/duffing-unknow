@@ -1,0 +1,43 @@
+clc;clear;close all;
+
+%% 直接生成你要的输入信号 a = 0.01*cos(2π*10t) + 噪声
+fs = 1000;                % 采样率不变
+sim_duration = 100;       % 仿真时间不变
+t_data = (0:1/fs:sim_duration)';  % 时间轴
+
+% 你要的输入信号
+a = 0.05*cos(2*pi*10*t_data) + 0.1*randn(size(t_data));
+
+%% 创建外加信号插值函数（直接用新信号 a）
+ext_signal = @(tq) interp1(t_data, a, mod(tq, t_data(end)), 'linear', 0);
+
+%% 设置系统初始条件
+u0 = [0, 0];
+tspan = [0, sim_duration];
+
+%% 设置振子参数 
+l = 142;  
+w = 1.03^l;
+f_signal = w / (2 * pi); % Hz
+f_drive = 1.03376;
+
+fprintf('当前参数: l = %d, omega_l = %.6f, 对应频率 f = %.4f Hz\n', l, w, f_signal);
+
+%% 求解微分方程
+r=1.088;
+odefun = @(t,u) Duffing_unknown(t, u,r, w, ext_signal);
+[t, u] = ode45(odefun, tspan, u0);
+x1 = u(:,1);
+
+
+%% 保存输出信号
+save('x1.mat', 'x1', 't');
+
+%% 绘图：时序图
+figure;
+n = 1:length(x1);
+plot(n,x1);
+xlabel('n', 'FontSize', 12);
+ylabel('$x$/V', 'FontSize', 12, 'Interpreter', 'latex');
+grid on;
+xlim([1, length(x1)]);
