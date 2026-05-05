@@ -1,0 +1,25 @@
+% 1. 加载数据
+load('x1.mat');  % 假设文件中仅包含 x1 变量（N×1 向量）
+
+% 2. 手动指定采样率（必须根据实际信号修改！）
+fs = 1000;  % 示例：若原始信号采样率是 1000Hz，替换为真实值
+fprintf('采样率设置为: %.2f Hz\n', fs);
+
+% 3. 希尔伯特变换提取包络
+analytic_sig = hilbert(x1);  
+envelope = abs(analytic_sig);  
+
+% 4. 直接对包络做 FFT 频谱分析（极简版，不使用 pwelch）
+N = length(envelope);  
+envelope_fft = fft(envelope)/N;  % 归一化 FFT
+freq_axis = (0:N-1)*(fs/N);       % 频率轴 (Hz)
+amplitude_dB = 10*log10(abs(envelope_fft)/max(abs(envelope_fft)));  % 归一化 dB
+
+% 5. 绘图（聚焦低频，与你的需求匹配）
+figure(1);
+plot(freq_axis, amplitude_dB, 'LineWidth', 1.2, 'Color', [0.6, 0.2, 0.8]);
+xlabel('频率 f / Hz', 'FontSize', 14);
+ylabel('幅度 / dB', 'FontSize', 14);
+xlim([0, 1]);  % 聚焦 0-1Hz，与你的图范围一致
+grid on;
+% ylim([-60, 10]); % 限制 dB 范围，突出有效成分
